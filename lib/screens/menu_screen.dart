@@ -31,9 +31,9 @@ class _MenuScreenState extends State<MenuScreen> {
   Future<void> _handleLogout() async {
     final authService = AuthService();
     await authService.logout();
-    
+
     if (!mounted) return;
-    
+
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,
@@ -43,8 +43,11 @@ class _MenuScreenState extends State<MenuScreen> {
   void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$feature - Próximamente'),
-        backgroundColor: const Color(0xFF003366),
+        content: Text(
+          '$feature - Próximamente',
+          style: const TextStyle(color: Colors.white), 
+        ),
+        backgroundColor: Colors.black, // BANNER NEGRO
       ),
     );
   }
@@ -100,7 +103,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   ],
                 ),
               ),
-              
+
               // Menu Grid
               Expanded(
                 child: Container(
@@ -138,7 +141,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   ),
                 ),
               ),
-              
+
               // Logout Button
               Padding(
                 padding: const EdgeInsets.all(24),
@@ -220,7 +223,7 @@ class _MenuButton extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF003366),
+                  color: Colors.white,
                 ),
               ),
             ],

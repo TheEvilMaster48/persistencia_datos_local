@@ -74,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.all(24),
             child: Card(
               elevation: 8,
+              color: Colors.transparent,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -94,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF003366),
+                          color: Colors.white,     // ← BLANCO
                         ),
                       ),
 
@@ -102,10 +103,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       TextFormField(
                         controller: _usernameController,
+                        style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           labelText: 'Usuario',
-                          prefixIcon: const Icon(Icons.person),
-                          border: OutlineInputBorder(),
+                          labelStyle: const TextStyle(color: Colors.white),
+                          prefixIcon: const Icon(Icons.person, color: Colors.white),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.white),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.cyanAccent),
+                          ),
                         ),
                         validator: (value) =>
                             value!.isEmpty ? 'Ingresa tu usuario' : null,
@@ -116,19 +124,27 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
+                        style: const TextStyle(color: Colors.white), 
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
-                          prefixIcon: const Icon(Icons.lock),
+                          labelStyle: const TextStyle(color: Colors.white),
+                          prefixIcon: const Icon(Icons.lock, color: Colors.white),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
                                   ? Icons.visibility_off
                                   : Icons.visibility,
+                              color: Colors.white,
                             ),
                             onPressed: () =>
                                 setState(() => _obscurePassword = !_obscurePassword),
                           ),
-                          border: OutlineInputBorder(),
+                          enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.cyanAccent),
+                          ),
                         ),
                         validator: (value) =>
                             value!.isEmpty ? 'Ingresa tu contraseña' : null,
@@ -149,14 +165,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 48,
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _handleLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.lightBlueAccent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
                           child: _isLoading
                               ? const CircularProgressIndicator(color: Colors.white)
                               : const Text(
                                   'Iniciar Sesión',
-                                  style: TextStyle(fontSize: 16),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,   // ← TEXTO BLANCO
+                                  ),
                                 ),
                         ),
                       ),
+
+                      const SizedBox(height: 8),
 
                       TextButton(
                         onPressed: () {
@@ -166,7 +193,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 builder: (_) => const RegisterScreen()),
                           );
                         },
-                        child: const Text("¿No tienes cuenta? Regístrate aquí"),
+                        child: const Text(
+                          "¿No tienes cuenta? Regístrate aquí",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       )
                     ],
                   ),

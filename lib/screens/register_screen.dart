@@ -36,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // RED - REGISTRO
+  // REGISTRO
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -74,7 +74,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // RED - UI
+  // UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.all(24),
             child: Card(
               elevation: 8,
+              color: Colors.black26,
               shape:
                   RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Padding(
@@ -102,7 +103,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const Text(
                         "Crear Cuenta",
                         style: TextStyle(
-                          color: Color(0xFF003366),
+                          color: Colors.white,
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                         ),
@@ -110,7 +111,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 24),
 
-                      // RED - USUARIO
+                      // USUARIO
                       _buildField(
                         controller: _usernameController,
                         label: "Usuario",
@@ -119,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 16),
 
-                      // RED - EMAIL
+                      // EMAIL
                       _buildField(
                         controller: _emailController,
                         label: "Correo Electrónico",
@@ -129,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 16),
 
-                      // RED - TELÉFONO
+                      // TELÉFONO
                       _buildField(
                         controller: _telefonoController,
                         label: "Teléfono",
@@ -139,7 +140,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 16),
 
-                      // RED - CONTRASEÑA
+                      // CONTRASEÑA
                       _buildPasswordField(
                         controller: _passwordController,
                         label: "Contraseña",
@@ -150,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 16),
 
-                      // RED - CONFIRMAR CONTRASEÑA
+                      // CONFIRMAR CONTRASEÑA
                       _buildPasswordField(
                         controller: _confirmPasswordController,
                         label: "Confirmar Contraseña",
@@ -166,14 +167,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       const SizedBox(height: 12),
 
-                      // RED - BOTÓN REGISTRAR
+                      // BOTÓN REGISTRAR
                       SizedBox(
                         width: double.infinity,
                         height: 48,
                         child: ElevatedButton(
                           onPressed: _loading ? null : _register,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF003366),
+                            backgroundColor: Colors.lightBlueAccent,
                           ),
                           child: _loading
                               ? const CircularProgressIndicator(
@@ -193,7 +194,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           "Ya tengo cuenta",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF003366),
+                            color: Colors.white,
                           ),
                         ),
                       )
@@ -208,7 +209,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // RED - COMPONENTES
+  // COMPONENTES ========================
+
   Widget _buildField({
     required TextEditingController controller,
     required String label,
@@ -218,11 +220,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return TextFormField(
       controller: controller,
       keyboardType: type,
+      style: const TextStyle(color: Colors.white),
       validator: (v) => v == null || v.isEmpty ? "Campo requerido" : null,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: Icon(icon),
+        labelStyle: const TextStyle(color: Colors.white),
+        prefixIcon: Icon(icon, color: Colors.white),
+        hintStyle: const TextStyle(color: Colors.white70),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.white),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.cyanAccent, width: 2),
+        ),
       ),
     );
   }
@@ -236,15 +249,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return TextFormField(
       controller: controller,
       obscureText: obscure,
+      style: const TextStyle(color: Colors.white),
       validator: (v) => v == null || v.isEmpty ? "Campo requerido" : null,
       decoration: InputDecoration(
         labelText: label,
-        prefixIcon: const Icon(Icons.lock),
+        labelStyle: const TextStyle(color: Colors.white),
+        prefixIcon: const Icon(Icons.lock, color: Colors.white),
         suffixIcon: IconButton(
           onPressed: toggle,
-          icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
+          icon: Icon(
+            obscure ? Icons.visibility_off : Icons.visibility,
+            color: Colors.white,
+          ),
         ),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        enabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.cyanAccent, width: 2),
+        ),
       ),
     );
   }
@@ -253,7 +277,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.red.shade50,
+        color: Colors.black,
         borderRadius: BorderRadius.circular(8),
         border: const Border(
           left: BorderSide(color: Colors.red, width: 4),
@@ -261,7 +285,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
       child: Text(
         message,
-        style: TextStyle(color: Colors.red.shade900),
+        style: const TextStyle(color: Colors.white),
       ),
     );
   }

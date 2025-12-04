@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _savedEmail;
   bool _isLoading = true;
   String _message = '';
-  Color _messageColor = Colors.blue;
+  Color _messageColor = Colors.white;
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final email = _emailController.text.trim();
     
     if (email.isEmpty) {
-      _showMessage('Por favor ingresa un email', Colors.red);
+      _showMessage('Por favor ingresa un email', Colors.white);
       return;
     }
 
@@ -53,9 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
     
     if (success) {
       setState(() => _savedEmail = email);
-      _showMessage('¡Email guardado exitosamente!', Colors.green);
+      _showMessage('¡Email guardado exitosamente!', Colors.white);
     } else {
-      _showMessage('Error al guardar email', Colors.red);
+      _showMessage('Error al guardar email', Colors.white);
     }
   }
 
@@ -68,9 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _savedEmail = null;
         _emailController.clear();
       });
-      _showMessage('Email eliminado del almacenamiento', Colors.orange);
+      _showMessage('Email eliminado del almacenamiento', Colors.white);
     } else {
-      _showMessage('Error al eliminar email', Colors.red);
+      _showMessage('Error al eliminar email', Colors.white);
     }
   }
 
@@ -99,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_isLoading) {
       return const Scaffold(
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: Colors.white),
         ),
       );
     }
@@ -122,6 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(24.0),
               child: Card(
                 elevation: 8,
+                color: Colors.black26,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -177,14 +178,14 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           width: 80,
           height: 80,
-          decoration: BoxDecoration(
-            color: Colors.deepPurple.shade50,
+          decoration: const BoxDecoration(
+            color: Colors.white24,
             shape: BoxShape.circle,
           ),
-          child: Icon(
+          child: const Icon(
             Icons.email,
             size: 40,
-            color: Colors.deepPurple.shade600,
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 16),
@@ -193,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF1f2937),
+            color: Colors.white,
           ),
           textAlign: TextAlign.center,
         ),
@@ -202,7 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'App de Correo con SharedPreferences',
           style: TextStyle(
             fontSize: 14,
-            color: Color(0xFF6b7280),
+            color: Colors.white,
           ),
           textAlign: TextAlign.center,
         ),
@@ -210,16 +211,16 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.deepPurple.shade50,
+            color: Colors.black54,
             borderRadius: BorderRadius.circular(8),
-            border: Border(
+            border: const Border(
               left: BorderSide(
-                color: Colors.deepPurple.shade500,
+                color: Colors.white,
                 width: 4,
               ),
             ),
           ),
-          child: Column(
+          child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
@@ -227,15 +228,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple.shade900,
+                  color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4),
               Text(
                 'Esta app guarda tu correo localmente y lo muestra automáticamente al abrir.',
                 style: TextStyle(
                   fontSize: 11,
-                  color: Colors.deepPurple.shade800,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -250,36 +251,21 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(top: 24),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
+        color: Colors.black,
         borderRadius: BorderRadius.circular(8),
-        border: Border(
+        border: const Border(
           left: BorderSide(
-            color: Colors.green.shade500,
+            color: Colors.white,
             width: 4,
           ),
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '✓ Email recuperado del almacenamiento local:',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade900,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            _savedEmail!,
-            style: TextStyle(
-              fontSize: 13,
-              fontFamily: 'monospace',
-              color: Colors.green.shade800,
-            ),
-          ),
-        ],
+      child: Text(
+        '✓ Email recuperado del almacenamiento local:\n$_savedEmail',
+        style: const TextStyle(
+          fontSize: 13,
+          color: Colors.white,
+        ),
       ),
     );
   }
@@ -289,20 +275,20 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(top: 24),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _messageColor.withOpacity(0.1),
+        color: Colors.black,
         borderRadius: BorderRadius.circular(8),
-        border: Border(
+        border: const Border(
           left: BorderSide(
-            color: _messageColor,
+            color: Colors.white,
             width: 4,
           ),
         ),
       ),
       child: Text(
         _message,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 13,
-          color: _messageColor,
+          color: Colors.white,
         ),
       ),
     );
@@ -317,33 +303,35 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
+            color: Colors.white,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _emailController,
           keyboardType: TextInputType.emailAddress,
+          style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             hintText: 'tu@correo.com',
+            hintStyle: const TextStyle(color: Colors.white70),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
-                color: Color(0xFFe5e7eb),
+                color: Colors.white,
                 width: 2,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
-                color: Color(0xFFe5e7eb),
+                color: Colors.white,
                 width: 2,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(
-                color: Color(0xFF7c3aed),
+                color: Colors.cyanAccent,
                 width: 2,
               ),
             ),
@@ -358,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'Tu email se guardará en el almacenamiento local del dispositivo',
           style: TextStyle(
             fontSize: 12,
-            color: Color(0xFF9ca3af),
+            color: Colors.white70,
           ),
         ),
       ],
@@ -372,9 +360,10 @@ class _HomeScreenState extends State<HomeScreen> {
           child: CustomButton(
             text: 'Guardar Email',
             icon: Icons.save,
+            color: Colors.white,
             onPressed: _saveEmail,
             gradient: const LinearGradient(
-              colors: [Color(0xFF7c3aed), Color(0xFF4f46e5)],
+              colors: [Colors.blueAccent, Colors.lightBlueAccent],
             ),
           ),
         ),
@@ -383,9 +372,9 @@ class _HomeScreenState extends State<HomeScreen> {
           CustomButton(
             text: 'Limpiar',
             icon: Icons.delete,
+            color: Colors.white,
             onPressed: _clearEmail,
             isOutline: true,
-            color: Colors.red,
           ),
         ],
       ],
@@ -396,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFf9fafb),
+        color: Colors.black45,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -407,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1f2937),
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 12),
@@ -445,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const Text(
             '• ',
             style: TextStyle(
-              color: Color(0xFF7c3aed),
+              color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -454,17 +443,19 @@ class _HomeScreenState extends State<HomeScreen> {
               text: TextSpan(
                 style: const TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF374151),
+                  color: Colors.white,
                 ),
                 children: [
                   TextSpan(
                     text: title,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                   TextSpan(
                     text: ' = $description',
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ],
               ),
@@ -480,7 +471,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'Ejemplo Práctico de Persistencia Local - Flutter',
       style: TextStyle(
         fontSize: 11,
-        color: Color(0xFF9ca3af),
+        color: Colors.white70,
       ),
       textAlign: TextAlign.center,
     );
