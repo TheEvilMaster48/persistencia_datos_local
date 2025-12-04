@@ -1,0 +1,38 @@
+name: persistencia_datos_local
+description: Sistema de Persistencia de Datos Local
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Firebase (versiones compatibles entre sí)
+  firebase_core: ^3.7.0
+  firebase_auth: ^5.1.4
+  
+  # Almacenamiento Local
+  shared_preferences: ^2.2.2
+  
+  # Base de Datos PostgreSQL
+  postgres: ^3.0.0
+  
+  # Utilidades
+  cupertino_icons: ^1.0.2
+  http: ^1.1.2
+  crypto: ^3.0.3
+  mailer: ^6.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icono/tech.gif
