@@ -24,8 +24,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadSavedEmail();
   }
 
-  /// Cargar email guardado al iniciar la app
-  /// Equivalente al useEffect en React
+  // Cargar email guardado al iniciar la app
+  // Equivalente al useEffect en React
   Future<void> _loadSavedEmail() async {
     setState(() => _isLoading = true);
     
@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  /// Guardar email en SharedPreferences
+  // Guardar email en SharedPreferences
   Future<void> _saveEmail() async {
     final email = _emailController.text.trim();
     
@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// Eliminar email del almacenamiento
+  // Eliminar email del almacenamiento
   Future<void> _clearEmail() async {
     final success = await _storageService.removeEmail();
     
@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// Mostrar mensaje temporal
+  // Mostrar mensaje temporal
   void _showMessage(String message, Color color) {
     setState(() {
       _message = message;

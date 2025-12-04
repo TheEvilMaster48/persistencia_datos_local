@@ -17,6 +17,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   http: ^1.1.2
   mailer: ^6.0.1
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.0
 
 dev_dependencies:
   flutter_test:
@@ -28,3 +30,22 @@ flutter:
 
   assets:
     - assets/icono/tech.gif
+    - assets/icono/tech.png
+
+# ICONO SOLO ANDROID
+flutter_icons:
+  android: true
+  ios: false
+  image_path: "assets/icono/tech.png"
+
+# SPLASH SOLO ANDROID
+flutter_native_splash:
+  android: true
+  ios: false
+  web: false
+  color: "#000000"
+  image: assets/icono/tech.png
+
+  android_12:
+    image: assets/icono/tech.png
+    icon_background_color: "#000000"
