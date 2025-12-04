@@ -83,7 +83,3 @@ flutter run
 - Persisten incluso después de cerrar la app
 - Se pierden al desinstalar la aplicación
 - No usar para datos sensibles sin encriptación
-
-## 👨‍💻 Autor
-
-Ejemplo práctico de persistencia de datos para fines educativos.
