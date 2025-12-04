@@ -209,7 +209,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  // COMPONENTES ========================
+  // COMPONENTES
 
   Widget _buildField({
     required TextEditingController controller,
