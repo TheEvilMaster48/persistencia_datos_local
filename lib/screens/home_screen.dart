@@ -289,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(top: 24),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _messageColor.withValues(alpha: 0.1),
+        color: _messageColor.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border(
           left: BorderSide(

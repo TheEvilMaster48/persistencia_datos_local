@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/menu_screen.dart';
@@ -7,19 +6,6 @@ import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Inicializar Firebase (corregido para Web)
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_AUTH_DOMAIN",
-      projectId: "TU_PROJECT_ID",
-      storageBucket: "TU_STORAGE_BUCKET",
-      messagingSenderId: "TU_MESSAGING_SENDER_ID",
-      appId: "TU_APP_ID",
-    ),
-  );
-  
   runApp(const PersistenciaDatosApp());
 }
 
@@ -45,6 +31,7 @@ class PersistenciaDatosApp extends StatelessWidget {
   }
 }
 
+// VERIFICAR SI EXISTE SESIÓN
 class AuthCheckScreen extends StatefulWidget {
   const AuthCheckScreen({super.key});
 
@@ -60,13 +47,15 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   }
 
   Future<void> _checkAuth() async {
+    // OBTENER TOKEN GUARDADO
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('sessionToken');
-    
+
+    // VALIDAR TOKEN
     if (token != null && token.isNotEmpty) {
       final authService = AuthService();
       final isValid = await authService.validateToken(token);
-      
+
       if (isValid && mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const MenuScreen()),
@@ -74,7 +63,8 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
         return;
       }
     }
-    
+
+    // IR A LOGIN SI NO HAY SESIÓN
     if (mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const LoginScreen()),

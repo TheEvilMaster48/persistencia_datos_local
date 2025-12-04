@@ -1,25 +1,40 @@
-import 'package:postgres/postgres.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class DatabaseService {
-  static const String host = 'localhost';
-  static const int port = 5432;
-  static const String database = 'persistencia_local_db';
-  static const String username = 'postgres';
-  static const String password = 'FfSantdmm,44';
+  static final DatabaseService instance = DatabaseService._internal();
+  static Database? _db;
 
-  Future<Connection> _getConnection() async {
-    final conn = await Connection.open(
-      Endpoint(
-        host: host,
-        port: port,
-        database: database,
-        username: username,
-        password: password,
-      ),
-      settings: const ConnectionSettings(sslMode: SslMode.disable),
+  DatabaseService._internal();
+
+  Future<Database> _getDB() async {
+    if (_db != null) return _db!;
+
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'persistencia_local.db');
+
+    _db = await openDatabase(
+      path,
+      version: 1,
+      onCreate: (db, version) async {
+        await db.execute('''
+          CREATE TABLE usuarios (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            telefono TEXT,
+            codigo_verificacion TEXT,
+            email_verificado INTEGER DEFAULT 0,
+            token_sesion TEXT
+          )
+        ''');
+      },
     );
-    return conn;
+    return _db!;
   }
+
+  // CRUD
 
   Future<void> createUser({
     required String username,
@@ -28,130 +43,75 @@ class DatabaseService {
     required String telefono,
     required String verificationCode,
   }) async {
-    final conn = await _getConnection();
-
-    await conn.execute(
-      '''
-      INSERT INTO usuarios (username, email, password_hash, telefono, codigo_verificacion, email_verificado)
-      VALUES (\$1, \$2, \$3, \$4, \$5, false)
-      ''',
-      parameters: [username, email, passwordHash, telefono, verificationCode],
-    );
-
-    await conn.close();
+    final db = await _getDB();
+    await db.insert("usuarios", {
+      'username': username,
+      'email': email,
+      'password_hash': passwordHash,
+      'telefono': telefono,
+      'codigo_verificacion': verificationCode,
+      'email_verificado': 0,
+    });
   }
 
   Future<Map<String, dynamic>?> getUserByEmail(String email) async {
-    final conn = await _getConnection();
-
-    final result = await conn.execute(
-      'SELECT * FROM usuarios WHERE email = \$1',
-      parameters: [email],
-    );
-
-    await conn.close();
-
-    if (result.isEmpty) return null;
-    final row = result.first;
-
-    return {
-      'id': row[0],
-      'username': row[1],
-      'email': row[2],
-      'password_hash': row[3],
-      'telefono': row[4],
-      'codigo_verificacion': row[5],
-      'email_verificado': row[6],
-      'token_sesion': row[7],
-    };
+    final db = await _getDB();
+    final result =
+        await db.query("usuarios", where: "email = ?", whereArgs: [email]);
+    return result.isNotEmpty ? result.first : null;
   }
 
   Future<Map<String, dynamic>?> getUserByUsername(String username) async {
-    final conn = await _getConnection();
-
-    final result = await conn.execute(
-      'SELECT * FROM usuarios WHERE username = \$1',
-      parameters: [username],
-    );
-
-    await conn.close();
-
-    if (result.isEmpty) return null;
-    final row = result.first;
-
-    return {
-      'id': row[0],
-      'username': row[1],
-      'email': row[2],
-      'password_hash': row[3],
-      'telefono': row[4],
-      'codigo_verificacion': row[5],
-      'email_verificado': row[6],
-      'token_sesion': row[7],
-    };
+    final db = await _getDB();
+    final result =
+        await db.query("usuarios", where: "username = ?", whereArgs: [username]);
+    return result.isNotEmpty ? result.first : null;
   }
 
   Future<Map<String, dynamic>?> getUserByToken(String token) async {
-    final conn = await _getConnection();
-
-    final result = await conn.execute(
-      'SELECT * FROM usuarios WHERE token_sesion = \$1',
-      parameters: [token],
-    );
-
-    await conn.close();
-
-    if (result.isEmpty) return null;
-    final row = result.first;
-
-    return {
-      'id': row[0],
-      'username': row[1],
-      'email': row[2],
-    };
+    final db = await _getDB();
+    final result = await db
+        .query("usuarios", where: "token_sesion = ?", whereArgs: [token]);
+    return result.isNotEmpty ? result.first : null;
   }
 
   Future<void> saveUserToken(int userId, String token) async {
-    final conn = await _getConnection();
-
-    await conn.execute(
-      'UPDATE usuarios SET token_sesion = \$1 WHERE id = \$2',
-      parameters: [token, userId],
+    final db = await _getDB();
+    await db.update(
+      "usuarios",
+      {'token_sesion': token},
+      where: "id = ?",
+      whereArgs: [userId],
     );
-
-    await conn.close();
   }
 
   Future<void> markEmailAsVerified(String email) async {
-    final conn = await _getConnection();
-
-    await conn.execute(
-      'UPDATE usuarios SET email_verificado = true WHERE email = \$1',
-      parameters: [email],
+    final db = await _getDB();
+    await db.update(
+      "usuarios",
+      {'email_verificado': 1},
+      where: "email = ?",
+      whereArgs: [email],
     );
-
-    await conn.close();
   }
 
   Future<void> updateVerificationCode(String email, String code) async {
-    final conn = await _getConnection();
-
-    await conn.execute(
-      'UPDATE usuarios SET codigo_verificacion = \$1 WHERE email = \$2',
-      parameters: [code, email],
+    final db = await _getDB();
+    await db.update(
+      "usuarios",
+      {'codigo_verificacion': code},
+      where: "email = ?",
+      whereArgs: [email],
     );
-
-    await conn.close();
   }
 
   Future<void> clearUserToken(String token) async {
-    final conn = await _getConnection();
-
-    await conn.execute(
-      'UPDATE usuarios SET token_sesion = NULL WHERE token_sesion = \$1',
-      parameters: [token],
+    final db = await _getDB();
+    await db.update(
+      "usuarios",
+      {'token_sesion': null},
+      where: "token_sesion = ?",
+      whereArgs: [token],
     );
-
-    await conn.close();
   }
 }

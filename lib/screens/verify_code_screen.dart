@@ -4,7 +4,7 @@ import 'login_screen.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
   final String email;
-  
+
   const VerifyCodeScreen({super.key, required this.email});
 
   @override
@@ -14,7 +14,7 @@ class VerifyCodeScreen extends StatefulWidget {
 class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
   final _codeController = TextEditingController();
   final _authService = AuthService();
-  
+
   bool _isLoading = false;
   String? _errorMessage;
   String? _successMessage;
@@ -25,6 +25,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     super.dispose();
   }
 
+  // RED - VERIFICAR CÓDIGO DE CORREO
   Future<void> _handleVerify() async {
     if (_codeController.text.isEmpty) {
       setState(() => _errorMessage = 'Por favor ingresa el código');
@@ -48,20 +49,19 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
 
     if (result['success']) {
       setState(() => _successMessage = 'Email verificado correctamente');
-      
+
       await Future.delayed(const Duration(seconds: 2));
-      
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
-        );
-      }
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        (route) => false,
+      );
     } else {
       setState(() => _errorMessage = result['message']);
     }
   }
 
+  // RED - REENVIAR CÓDIGO
   Future<void> _handleResend() async {
     setState(() {
       _isLoading = true;
@@ -82,198 +82,116 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
     }
   }
 
+  // RED - UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
+            colors: [Color(0xFF003366), Color(0xFF004488), Color(0xFF002244)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF003366),
-              Color(0xFF004488),
-              Color(0xFF002244),
-            ],
           ),
         ),
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(24),
             child: Card(
               elevation: 8,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Container(
-                padding: const EdgeInsets.all(32.0),
-                constraints: const BoxConstraints(maxWidth: 400),
+              child: Padding(
+                padding: const EdgeInsets.all(32),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(
-                      Icons.email_outlined,
-                      size: 64,
-                      color: Color(0xFF003366),
-                    ),
-                    
+                    const Icon(Icons.email_outlined,
+                        size: 64, color: Color(0xFF003366)),
+
                     const SizedBox(height: 16),
-                    
+
                     const Text(
                       'Verifica tu Email',
                       style: TextStyle(
+                        color: Color(0xFF003366),
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF003366),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border(
-                          left: BorderSide(color: Colors.blue, width: 4),
-                        ),
-                      ),
-                      child: Text(
-                        'Se ha enviado un código de verificación a ${widget.email}',
-                        style: TextStyle(
-                          color: Colors.blue.shade900,
-                          fontSize: 14,
-                        ),
-                      ),
+
+                    Text(
+                      'Se envió un código a ${widget.email}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.blue.shade900),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
-                    // Campo código
+
+                    // RED - CAMPO CÓDIGO
                     TextField(
                       controller: _codeController,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 8,
-                      ),
                       maxLength: 6,
                       keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        hintText: '000000',
-                        counterText: '',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                      style: const TextStyle(
+                        fontSize: 24,
+                        letterSpacing: 8,
+                        fontWeight: FontWeight.bold,
                       ),
+                      decoration: const InputDecoration(counterText: ''),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
-                    // Mensajes
+
                     if (_errorMessage != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border(
-                            left: BorderSide(color: Colors.red, width: 4),
-                          ),
-                        ),
-                        child: Text(
-                          _errorMessage!,
-                          style: TextStyle(color: Colors.red.shade900),
-                        ),
-                      ),
-                    
+                      _buildMessage(_errorMessage!, Colors.red),
+
                     if (_successMessage != null)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border(
-                            left: BorderSide(color: Colors.green, width: 4),
-                          ),
-                        ),
-                        child: Text(
-                          _successMessage!,
-                          style: TextStyle(color: Colors.green.shade900),
-                        ),
-                      ),
-                    
-                    // Botón Verificar
+                      _buildMessage(_successMessage!, Colors.green),
+
+                    const SizedBox(height: 12),
+
+                    // RED - BOTÓN VERIFICAR
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _handleVerify,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF003366),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
                         ),
                         child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text(
-                                'Verificar Código',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
+                            : const Text('Verificar Código'),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
-                    // Botón Reenviar
+
+                    // RED - BOTÓN REENVIAR
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : _handleResend,
                         style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF003366), width: 2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                          side: const BorderSide(
+                              color: Color(0xFF003366), width: 2),
                         ),
-                        child: const Text(
-                          'Reenviar Código',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color(0xFF003366),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: const Text('Reenviar Código'),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
-                    // Botón Volver
+
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text(
                         'Volver',
-                        style: TextStyle(
-                          color: Color(0xFF003366),
-                        ),
+                        style: TextStyle(color: Color(0xFF003366)),
                       ),
                     ),
                   ],
@@ -282,6 +200,26 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // RED - WIDGET MENSAJE
+  Widget _buildMessage(String msg, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border(left: BorderSide(color: color, width: 4)),
+        color: color.withOpacity(0.1),
+      ),
+      child: Text(
+        msg,
+        style: const TextStyle(
+          color: Colors.black87,
+          fontWeight: FontWeight.bold,
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }
