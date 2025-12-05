@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/auth_service.dart';
 import 'login_screen.dart';
+import 'package:local_auth/local_auth.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -13,6 +14,8 @@ class MenuScreen extends StatefulWidget {
 class _MenuScreenState extends State<MenuScreen> {
   String _username = '';
   String _email = '';
+
+  final LocalAuthentication _localAuth = LocalAuthentication();
 
   @override
   void initState() {
@@ -40,6 +43,13 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
+  // ← AÑADIDO: Eliminar credenciales si el usuario lo desea
+  Future<void> _clearSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('saved_username');
+    await prefs.remove('saved_password');
+  }
+
   void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -47,7 +57,7 @@ class _MenuScreenState extends State<MenuScreen> {
           '$feature - Próximamente',
           style: const TextStyle(color: Colors.white), 
         ),
-        backgroundColor: Colors.black, // BANNER NEGRO
+        backgroundColor: Colors.black,
       ),
     );
   }
@@ -117,25 +127,37 @@ class _MenuScreenState extends State<MenuScreen> {
                         icon: Icons.storage,
                         title: 'Datos Locales',
                         color: const Color(0xFFFFCC00),
-                        onTap: () => _showComingSoon('Gestión de Datos Locales'),
+                        onTap: () {
+                          Navigator.pushNamed(
+                              context, '/brujula');
+                        },
                       ),
                       _MenuButton(
                         icon: Icons.cloud,
                         title: 'Datos Remotos',
                         color: const Color(0xFF4CAF50),
-                        onTap: () => _showComingSoon('Gestión de Datos Remotos'),
+                        onTap: () {
+                          Navigator.pushNamed(
+                              context, '/clima');
+                        },
                       ),
                       _MenuButton(
                         icon: Icons.sync,
                         title: 'Sincronización',
                         color: const Color(0xFF2196F3),
-                        onTap: () => _showComingSoon('Sincronización de Datos'),
+                        onTap: () {
+                          Navigator.pushNamed(
+                              context, '/alertas');
+                        },
                       ),
                       _MenuButton(
                         icon: Icons.settings,
                         title: 'Configuración',
                         color: const Color(0xFF9C27B0),
-                        onTap: () => _showComingSoon('Configuración'),
+                        onTap: () {
+                          Navigator.pushNamed(
+                              context, '/altitud');
+                        },
                       ),
                     ],
                   ),

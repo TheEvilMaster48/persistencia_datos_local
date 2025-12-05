@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'register_screen.dart';
 import 'menu_screen.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,9 +18,18 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _authService = AuthService();
 
+  final LocalAuthentication _localAuth = LocalAuthentication(); 
+
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
+  bool _hasSavedCredentials = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSavedCredentials();
+  }
 
   @override
   void dispose() {
@@ -27,6 +38,53 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // ← AÑADIDO: Revisar si hay credenciales guardadas
+  Future<void> _checkSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUser = prefs.getString('saved_username');
+    final savedPass = prefs.getString('saved_password');
+
+    setState(() {
+      _hasSavedCredentials = (savedUser != null && savedPass != null);
+    });
+  }
+
+  // ← AÑADIDO: Autenticación biométrica
+  Future<void> _loginWithBiometrics() async {
+    final canAuthenticate = await _localAuth.canCheckBiometrics;
+
+    if (!canAuthenticate) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Biometría no disponible')),
+      );
+      return;
+    }
+
+    final didAuthenticate = await _localAuth.authenticate(
+      localizedReason: "Usa tu huella o rostro para iniciar sesión",
+    );
+
+    if (didAuthenticate) {
+      final prefs = await SharedPreferences.getInstance();
+      final savedUser = prefs.getString('saved_username');
+      final savedPass = prefs.getString('saved_password');
+
+      if (savedUser != null && savedPass != null) {
+        final result =
+            await _authService.login(username: savedUser, password: savedPass);
+
+        if (result['success']) {
+          if (!mounted) return;
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MenuScreen()),
+          );
+        }
+      }
+    }
+  }
+
+  // LOGIN NORMAL
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -35,9 +93,12 @@ class _LoginScreenState extends State<LoginScreen> {
       _errorMessage = null;
     });
 
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text;
+
     final result = await _authService.login(
-      username: _usernameController.text.trim(),
-      password: _passwordController.text,
+      username: username,
+      password: password,
     );
 
     if (!mounted) return;
@@ -45,6 +106,11 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (result['success']) {
+      // ← AÑADIDO: Guardar credenciales para biometría
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('saved_username', username);
+      await prefs.setString('saved_password', password);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MenuScreen()),
@@ -95,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,     // ← BLANCO
+                          color: Colors.white,
                         ),
                       ),
 
@@ -124,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
-                        style: const TextStyle(color: Colors.white), 
+                        style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           labelText: 'Contraseña',
                           labelStyle: const TextStyle(color: Colors.white),
@@ -177,11 +243,31 @@ class _LoginScreenState extends State<LoginScreen> {
                                   'Iniciar Sesión',
                                   style: TextStyle(
                                     fontSize: 16,
-                                    color: Colors.white,   // ← TEXTO BLANCO
+                                    color: Colors.white,
                                   ),
                                 ),
                         ),
                       ),
+
+                      const SizedBox(height: 8),
+
+                      // ← AÑADIDO: Botón biometría si existen credenciales
+                      if (_hasSavedCredentials)
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            onPressed: _loginWithBiometrics,
+                            icon: const Icon(Icons.fingerprint, color: Colors.white),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                            ),
+                            label: const Text(
+                              "Ingresar con Huella / Rostro",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
 
                       const SizedBox(height: 8),
 
