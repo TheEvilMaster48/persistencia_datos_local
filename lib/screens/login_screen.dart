@@ -15,10 +15,10 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _authService = AuthService();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
+  final AuthService _authService = AuthService();
   final LocalAuthentication _localAuth = LocalAuthentication();
 
   bool _isLoading = false;
@@ -39,6 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // Verifica si existen credenciales guardadas
   Future<void> _checkSavedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     final savedUser = prefs.getString('saved_username');
@@ -49,49 +50,53 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-// BIOMETRÍA 
-Future<void> _loginWithBiometrics() async {
-  try {
-    final canBio = await _localAuth.canCheckBiometrics;
-    final supported = await _localAuth.isDeviceSupported();
+  // BIOMETRÍA
+  Future<void> _loginWithBiometrics() async {
+    try {
+      if (!_hasSavedCredentials) return;
 
-    if (!canBio || !supported) {
+      final canBio = await _localAuth.canCheckBiometrics;
+      final supported = await _localAuth.isDeviceSupported();
+
+      if (!canBio || !supported) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Biometría no disponible")),
+        );
+        return;
+      }
+
+      final didAuth = await _localAuth.authenticate(
+        localizedReason: "Usa tu huella o rostro para iniciar sesión",
+      );
+
+      if (!didAuth) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final savedUser = prefs.getString('saved_username');
+      final savedPass = prefs.getString('saved_password');
+
+      if (savedUser == null || savedPass == null) return;
+
+      final result = await _authService.login(
+        username: savedUser,
+        password: savedPass,
+      );
+
+      if (result['success']) {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MenuScreen()),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Biometría no disponible en este dispositivo")),
-      );
-      return;
-    }
-    final didAuth = await _localAuth.authenticate(
-      localizedReason: "Usa tu huella o rostro para iniciar sesión",
-    );
-
-    if (!didAuth) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    final savedUser = prefs.getString('saved_username');
-    final savedPass = prefs.getString('saved_password');
-
-    if (savedUser == null || savedPass == null) return;
-
-    final result = await _authService.login(
-      username: savedUser,
-      password: savedPass,
-    );
-
-    if (result['success']) {
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MenuScreen()),
+        const SnackBar(content: Text("No se pudo usar biometría")),
       );
     }
-  } catch (_) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("No se pudo usar biometría")),
-    );
   }
-}
 
+  // LOGIN NORMAL
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -171,9 +176,13 @@ Future<void> _loginWithBiometrics() async {
 
                       const SizedBox(height: 30),
 
+                      // USUARIO
                       TextFormField(
                         controller: _usernameController,
                         style: const TextStyle(color: Colors.white),
+                        onTap: () {
+                          _loginWithBiometrics(); // activa biometría al tocar
+                        },
                         decoration: const InputDecoration(
                           labelText: "Usuario",
                           labelStyle: TextStyle(color: Colors.white),
@@ -182,8 +191,8 @@ Future<void> _loginWithBiometrics() async {
                             borderSide: BorderSide(color: Colors.white),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide:
-                                BorderSide(color: Colors.cyanAccent, width: 2),
+                            borderSide: BorderSide(
+                                color: Colors.cyanAccent, width: 2),
                           ),
                         ),
                         validator: (v) =>
@@ -192,6 +201,7 @@ Future<void> _loginWithBiometrics() async {
 
                       const SizedBox(height: 16),
 
+                      // CONTRASEÑA
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
@@ -203,9 +213,11 @@ Future<void> _loginWithBiometrics() async {
                               const Icon(Icons.lock, color: Colors.white),
                           suffixIcon: IconButton(
                             color: Colors.white,
-                            icon: Icon(_obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility),
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _obscurePassword = !_obscurePassword;
@@ -235,6 +247,7 @@ Future<void> _loginWithBiometrics() async {
 
                       const SizedBox(height: 20),
 
+                      // BOTÓN LOGIN
                       SizedBox(
                         width: double.infinity,
                         height: 48,
@@ -256,6 +269,7 @@ Future<void> _loginWithBiometrics() async {
 
                       const SizedBox(height: 10),
 
+                      // BOTÓN BIOMÉTRICO (solo si existe usuario guardado)
                       if (_hasSavedCredentials)
                         SizedBox(
                           width: double.infinity,
