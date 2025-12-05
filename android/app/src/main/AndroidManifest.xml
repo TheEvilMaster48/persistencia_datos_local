@@ -19,12 +19,15 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
+    <!-- BIOMETRÍA -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+
     <!-- NOTIFICACIONES Y VIBRACIÓN -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!-- CONFIGURACIÓN DE LA APLICACIÓN -->
     <application
         android:name="${applicationName}"
         android:label="Persistencia Datos"
@@ -34,7 +37,16 @@
         android:allowBackup="true"
         android:supportsRtl="true">
 
-        <!-- ACTIVIDAD PRINCIPAL -->
+        <!-- GOOGLE MAPS API KEY -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDQcYxKO8MacbETSdDG7oBEjTY3DH7oQdk" />
+
+        <!-- BIOMETRÍA -->
+        <meta-data
+            android:name="android.hardware.biometrics"
+            android:value="true" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -44,19 +56,16 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
 
-            <!-- TEMA DE LANZAMIENTO -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
 
-            <!-- INTENT PRINCIPAL -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <!-- FLUTTER EMBEDDING V2 -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

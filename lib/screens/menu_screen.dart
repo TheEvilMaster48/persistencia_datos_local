@@ -43,7 +43,6 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
-  // ← AÑADIDO: Eliminar credenciales si el usuario lo desea
   Future<void> _clearSavedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('saved_username');
@@ -55,7 +54,7 @@ class _MenuScreenState extends State<MenuScreen> {
       SnackBar(
         content: Text(
           '$feature - Próximamente',
-          style: const TextStyle(color: Colors.white), 
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black,
       ),
@@ -114,7 +113,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 ),
               ),
 
-              // Menu Grid
+              // MENU GRID
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(24),
@@ -123,40 +122,43 @@ class _MenuScreenState extends State<MenuScreen> {
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                     children: [
+                      // BRÚJULA
                       _MenuButton(
-                        icon: Icons.storage,
-                        title: 'Datos Locales',
+                        icon: Icons.explore,
+                        title: 'Brújula',
                         color: const Color(0xFFFFCC00),
                         onTap: () {
-                          Navigator.pushNamed(
-                              context, '/brujula');
+                          Navigator.pushNamed(context, '/brujula');
                         },
                       ),
+
+                      // CLIMA
                       _MenuButton(
                         icon: Icons.cloud,
-                        title: 'Datos Remotos',
+                        title: 'Clima',
                         color: const Color(0xFF4CAF50),
                         onTap: () {
-                          Navigator.pushNamed(
-                              context, '/clima');
+                          Navigator.pushNamed(context, '/clima');
                         },
                       ),
+
+                      // ALERTAS GPS
                       _MenuButton(
-                        icon: Icons.sync,
-                        title: 'Sincronización',
+                        icon: Icons.warning,
+                        title: 'Alertas GPS',
                         color: const Color(0xFF2196F3),
                         onTap: () {
-                          Navigator.pushNamed(
-                              context, '/alertas');
+                          Navigator.pushNamed(context, '/alertas');
                         },
                       ),
+
+                      // ALTITUD
                       _MenuButton(
-                        icon: Icons.settings,
-                        title: 'Configuración',
+                        icon: Icons.assessment,
+                        title: 'Altitud',
                         color: const Color(0xFF9C27B0),
                         onTap: () {
-                          Navigator.pushNamed(
-                              context, '/altitud');
+                          Navigator.pushNamed(context, '/altitud');
                         },
                       ),
                     ],

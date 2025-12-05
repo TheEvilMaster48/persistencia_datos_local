@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../services/auth_service.dart';
 import 'register_screen.dart';
 import 'menu_screen.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,12 +19,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _authService = AuthService();
 
-  final LocalAuthentication _localAuth = LocalAuthentication(); 
+  final LocalAuthentication _localAuth = LocalAuthentication();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
-  String? _errorMessage;
   bool _hasSavedCredentials = false;
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -38,53 +39,59 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  // ← AÑADIDO: Revisar si hay credenciales guardadas
   Future<void> _checkSavedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     final savedUser = prefs.getString('saved_username');
     final savedPass = prefs.getString('saved_password');
 
     setState(() {
-      _hasSavedCredentials = (savedUser != null && savedPass != null);
+      _hasSavedCredentials = savedUser != null && savedPass != null;
     });
   }
 
-  // ← AÑADIDO: Autenticación biométrica
-  Future<void> _loginWithBiometrics() async {
-    final canAuthenticate = await _localAuth.canCheckBiometrics;
+// BIOMETRÍA 
+Future<void> _loginWithBiometrics() async {
+  try {
+    final canBio = await _localAuth.canCheckBiometrics;
+    final supported = await _localAuth.isDeviceSupported();
 
-    if (!canAuthenticate) {
+    if (!canBio || !supported) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Biometría no disponible')),
+        const SnackBar(content: Text("Biometría no disponible en este dispositivo")),
       );
       return;
     }
-
-    final didAuthenticate = await _localAuth.authenticate(
+    final didAuth = await _localAuth.authenticate(
       localizedReason: "Usa tu huella o rostro para iniciar sesión",
     );
 
-    if (didAuthenticate) {
-      final prefs = await SharedPreferences.getInstance();
-      final savedUser = prefs.getString('saved_username');
-      final savedPass = prefs.getString('saved_password');
+    if (!didAuth) return;
 
-      if (savedUser != null && savedPass != null) {
-        final result =
-            await _authService.login(username: savedUser, password: savedPass);
+    final prefs = await SharedPreferences.getInstance();
+    final savedUser = prefs.getString('saved_username');
+    final savedPass = prefs.getString('saved_password');
 
-        if (result['success']) {
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MenuScreen()),
-          );
-        }
-      }
+    if (savedUser == null || savedPass == null) return;
+
+    final result = await _authService.login(
+      username: savedUser,
+      password: savedPass,
+    );
+
+    if (result['success']) {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MenuScreen()),
+      );
     }
+  } catch (_) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("No se pudo usar biometría")),
+    );
   }
+}
 
-  // LOGIN NORMAL
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -101,16 +108,14 @@ class _LoginScreenState extends State<LoginScreen> {
       password: password,
     );
 
-    if (!mounted) return;
-
     setState(() => _isLoading = false);
 
     if (result['success']) {
-      // ← AÑADIDO: Guardar credenciales para biometría
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('saved_username', username);
       await prefs.setString('saved_password', password);
 
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const MenuScreen()),
@@ -126,63 +131,63 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
             colors: [
               Color(0xFF003366),
               Color(0xFF004488),
               Color(0xFF002244),
             ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Card(
-              elevation: 8,
+              elevation: 10,
               color: Colors.transparent,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(32),
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Image.asset("assets/icono/tech.gif",
                           height: 120, width: 120),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       const Text(
-                        'Persistencia de Datos',
+                        "Persistencia de Datos",
                         style: TextStyle(
                           fontSize: 32,
-                          fontWeight: FontWeight.bold,
                           color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 30),
 
                       TextFormField(
                         controller: _usernameController,
                         style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: 'Usuario',
-                          labelStyle: const TextStyle(color: Colors.white),
-                          prefixIcon: const Icon(Icons.person, color: Colors.white),
+                        decoration: const InputDecoration(
+                          labelText: "Usuario",
+                          labelStyle: TextStyle(color: Colors.white),
+                          prefixIcon: Icon(Icons.person, color: Colors.white),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.white),
+                            borderSide: BorderSide(color: Colors.white),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.cyanAccent),
+                            borderSide:
+                                BorderSide(color: Colors.cyanAccent, width: 2),
                           ),
                         ),
-                        validator: (value) =>
-                            value!.isEmpty ? 'Ingresa tu usuario' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? "Ingresa tu usuario" : null,
                       ),
 
                       const SizedBox(height: 16),
@@ -192,39 +197,43 @@ class _LoginScreenState extends State<LoginScreen> {
                         obscureText: _obscurePassword,
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          labelText: 'Contraseña',
+                          labelText: "Contraseña",
                           labelStyle: const TextStyle(color: Colors.white),
-                          prefixIcon: const Icon(Icons.lock, color: Colors.white),
+                          prefixIcon:
+                              const Icon(Icons.lock, color: Colors.white),
                           suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: Colors.white,
-                            ),
-                            onPressed: () =>
-                                setState(() => _obscurePassword = !_obscurePassword),
+                            color: Colors.white,
+                            icon: Icon(_obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
                           ),
                           enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
                           ),
                           focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.cyanAccent),
+                            borderSide:
+                                BorderSide(color: Colors.cyanAccent, width: 2),
                           ),
                         ),
-                        validator: (value) =>
-                            value!.isEmpty ? 'Ingresa tu contraseña' : null,
+                        validator: (v) =>
+                            v!.isEmpty ? "Ingresa tu contraseña" : null,
                       ),
 
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
                       if (_errorMessage != null)
                         Text(
                           _errorMessage!,
-                          style: const TextStyle(color: Colors.red),
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 16),
                         ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       SizedBox(
                         width: double.infinity,
@@ -233,32 +242,28 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: _isLoading ? null : _handleLogin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.lightBlueAccent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
                           ),
                           child: _isLoading
-                              ? const CircularProgressIndicator(color: Colors.white)
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white)
                               : const Text(
-                                  'Iniciar Sesión',
+                                  "Iniciar Sesión",
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
+                                      color: Colors.white, fontSize: 16),
                                 ),
                         ),
                       ),
 
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
 
-                      // ← AÑADIDO: Botón biometría si existen credenciales
                       if (_hasSavedCredentials)
                         SizedBox(
                           width: double.infinity,
                           height: 48,
                           child: ElevatedButton.icon(
                             onPressed: _loginWithBiometrics,
-                            icon: const Icon(Icons.fingerprint, color: Colors.white),
+                            icon: const Icon(Icons.fingerprint,
+                                color: Colors.white),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                             ),
@@ -269,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
 
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 10),
 
                       TextButton(
                         onPressed: () {
@@ -280,7 +285,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                         child: const Text(
-                          "¿No tienes cuenta? Regístrate aquí",
+                          "¿No tienes cuenta? Regístrate",
                           style: TextStyle(color: Colors.white),
                         ),
                       )

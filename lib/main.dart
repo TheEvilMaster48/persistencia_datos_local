@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+// SCREENS
 import 'screens/login_screen.dart';
 import 'screens/menu_screen.dart';
+import 'screens/brujula_screen.dart';
+import 'screens/clima_screen.dart';
+import 'screens/alertas_screen.dart';
+import 'screens/altitud_screen.dart';
+
+// SERVICES
 import 'services/auth_service.dart';
+import 'services/compass_service.dart';
+import 'services/clima_service.dart';
+import 'services/alertas_service.dart';
+import 'services/altitud_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,24 +27,43 @@ class PersistenciaDatosApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Persistencia de Datos Local',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: const Color(0xFF003366),
-        scaffoldBackgroundColor: const Color(0xFF003366),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF003366),
-          brightness: Brightness.dark,
+    return MultiProvider(
+      providers: [
+        Provider(create: (_) => CompassService()),
+        Provider(create: (_) => ClimaService()),
+        Provider(create: (_) => AlertasService()),
+        Provider(create: (_) => AltitudService()),
+      ],
+      child: MaterialApp(
+        title: 'Persistencia de Datos Local',
+        debugShowCheckedModeBanner: false,
+
+        theme: ThemeData(
+          primaryColor: const Color(0xFF003366),
+          scaffoldBackgroundColor: const Color(0xFF003366),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF003366),
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
         ),
-        useMaterial3: true,
+
+        home: const AuthCheckScreen(),
+
+        routes: {
+          '/login': (_) => const LoginScreen(),
+          '/menu': (_) => const MenuScreen(),
+          '/brujula': (_) => const BrujulaScreen(),
+          '/clima': (_) => const ClimaScreen(),
+          '/alertas': (_) => const AlertasScreen(),
+          '/altitud': (_) => const AltitudScreen(),
+        },
       ),
-      home: const AuthCheckScreen(),
     );
   }
 }
 
-// VERIFICAR SI EXISTE SESIÓN
+// VERIFICA SESIÓN ACTIVA
 class AuthCheckScreen extends StatefulWidget {
   const AuthCheckScreen({super.key});
 
@@ -47,28 +79,21 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   }
 
   Future<void> _checkAuth() async {
-    // OBTENER TOKEN GUARDADO
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('sessionToken');
 
-    // VALIDAR TOKEN
     if (token != null && token.isNotEmpty) {
       final authService = AuthService();
       final isValid = await authService.validateToken(token);
 
       if (isValid && mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MenuScreen()),
-        );
+        Navigator.of(context).pushReplacementNamed('/menu');
         return;
       }
     }
 
-    // IR A LOGIN SI NO HAY SESIÓN
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+      Navigator.of(context).pushReplacementNamed('/login');
     }
   }
 
